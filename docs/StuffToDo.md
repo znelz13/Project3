@@ -32,10 +32,10 @@ Project3/
 │   ├── utils.cpp                // Utility functions (FEN parsing, move conversion, logging).
 │   └── utils.h
 ├── data/
-│   └── puzzles.txt              // Dataset of mate-in-N puzzles (FEN positions, and optionally move sequences).
+│   └── lichess_db_puzzle.csv              // Dataset of mate-in-N puzzles (FEN positions, and optionally move sequences).
 ├── docs/
 │   ├── README.md                // This file
-│   └── projectPlan.docx         // Additional planning and meeting notes (if desired)
+│   └── StuffToDo.docx         // Additional planning and meeting notes
 ├── .gitignore                   // Exclude build files, CLion config, etc.
 └── CMakeLists.txt               // Build configuration for CLion/CMake
 
