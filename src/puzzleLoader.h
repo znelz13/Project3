@@ -5,11 +5,17 @@
 #ifndef PUZZLELOADER_H
 #define PUZZLELOADER_H
 
+#include "puzzle.h"
+#include <vector>
+#include <string>
+
+using namespace std;
 
 
-class puzzleLoader {
+vector<Puzzle> loadPuzzlesFromFile();
+vector<Puzzle> filterMateInNPuzzles(const vector<Puzzle>& puzzles, const string& theme);
 
-};
+
 
 
 

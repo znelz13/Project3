@@ -129,18 +129,19 @@ Project3/
 Assign tasks as follows:
 
 | **Module**                    | **Responsibilities**                                     | **Assigned To** |
-|-------------------------------|----------------------------------------------------------|--|
-| **Puzzle Loader**             | Parse datasets and filter puzzles                        |  |
-| **Chess Engine Interface**    | Integrate Stockfish for move generation & evaluation       |  |
-| **Backtracking Solver**       | Implement DFS/backtracking logic and optimizations         |  |
-| **A* Solver**                 | Implement A* search and tune heuristics                   |  |
-| **Visualization (GIF Generation)** | Render board snapshots, capture frames, and merge into GIF |  |
-| **Utility Functions**         | FEN parsing, move conversion, logging                    |  |
-| **Documentation & Integration** | Maintain README, merge modules, final testing             |  |
+|-------------------------------|----------------------------------------------------------|-----------------|
+| **Puzzle Loader**             | Parse datasets and filter puzzles                        | zack done       |
+| **Chess Engine Interface**    | Integrate Stockfish for move generation & evaluation       |                 |
+| **Backtracking Solver**       | Implement DFS/backtracking logic and optimizations         |                 |
+| **A* Solver**                 | Implement A* search and tune heuristics                   |                 |
+| **Visualization (GIF Generation)** | Render board snapshots, capture frames, and merge into GIF |                 |
+| **Utility Functions**         | FEN parsing, move conversion, logging                    |                 |
+| **Documentation & Integration** | Maintain README, merge modules, final testing             |                 |
 
 ## Milestones and Timeline
 
 - **Milestone 1: Dataset & Puzzle Loader (Due: MM/DD/YYYY)**
+    - DONE
     - Download dataset and implement puzzle loader.
 
 - **Milestone 2: Stockfish Integration (Due: MM/DD/YYYY)**
