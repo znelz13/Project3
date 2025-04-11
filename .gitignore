@@ -1,0 +1,43 @@
+# Build directories
+/build/
+/cmake-build-debug/
+/cmake-build-release/
+
+# CLion project files
+/.idea/
+/*.iml
+
+# CMake files
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+CTestTestfile.cmake
+Makefile
+cmake_install.cmake
+
+# Compiled object files and binaries
+*.o
+*.obj
+*.so
+*.dll
+*.dylib
+*.exe
+*.out
+*.a
+*.lib
+
+# Ignore dataset files
+data/lichess_db_puzzle.csv
+data/lichess_db_puzzle.csv.zst
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Log files and temporary files
+*.log
+*.tmp
+
+# Others
+*.swp
+*~
