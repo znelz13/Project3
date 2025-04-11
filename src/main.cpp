@@ -4,29 +4,23 @@
 #include <iostream>
 #include "puzzle.h"
 #include "puzzleLoader.h"
+#include "chessEngineInterface.h"
 
 using namespace std;
 
 int main() {
 
-    // Load puzzles
-    vector<Puzzle> puzzles = loadPuzzlesFromFile();
+    ChessEngineInterface engine;
 
-    // Test: Print first 5 puzzles
-    cout << "Loaded " << puzzles.size() << " puzzles." << endl;
+    string testFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    vector<string> moves = engine.getLegalMoves(testFEN);
 
-    for (int i = 0; i < 5 && i < puzzles.size(); ++i) {
-        cout << "Puzzle " << i + 1 << ":\n";
-        cout << "  ID:     " << puzzles[i].getPuzzleId() << endl;
-        cout << "  FEN:    " << puzzles[i].getFen() << endl;
-        cout << "  Moves:  " << puzzles[i].getMoves() << endl;
-        cout << "  Rating: " << puzzles[i].getRating() << endl;
-        cout << "  Theme:  " << puzzles[i].getTheme() << "\n" << endl;
+    cout << "Legal moves:\n";
+    for (const string& move : moves) {
+        cout << move << " ";
     }
-
-    vector<Puzzle> mateIn2Puzzles = filterMateInNPuzzles(puzzles, "mateIn4");
-
-    cout << "Filtered to " << mateIn2Puzzles.size() << " mateIn4 puzzles." << endl;
+    cout << endl;
 
     return 0;
+
 }
