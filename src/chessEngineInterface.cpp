@@ -18,12 +18,14 @@ ChessEngineInterface::ChessEngineInterface()
 {
     sendCommand("uci");
     waitForReady();
+    sendCommand("isready");
+    waitForReady();
 }
-
 
 // Destructor
 ChessEngineInterface::~ChessEngineInterface() {
-    // TODO: Close any open streams
+    engineInput << "quit" << endl;
+    engine.wait();
 }
 
 void ChessEngineInterface::sendCommand(const string& command) {
@@ -31,30 +33,79 @@ void ChessEngineInterface::sendCommand(const string& command) {
 }
 
 void ChessEngineInterface::waitForReady() {
-
+    string line;
+    while (getline(engineOutput, line)) {
+        if (line == "uciok" || line == "readyok")
+            break;
+    }
 }
-
-string ChessEngineInterface::readResponse() {
-
-}
-
 
 vector<string> ChessEngineInterface::getLegalMoves(const string& fen) {
-    vector<string> moves;
+    vector<string> legalMoves;
+
+    sendCommand("position fen " + fen);
+    sendCommand("go perft 1");
+
+    string line;
+    while (getline(engineOutput, line)) {
+        if (line.find("info string", 0) == 0)
+            continue;
+        if (line.find("Nodes searched:") != string::npos)
+            break;
+        int colon = line.find(":");
+        if (colon != string::npos) {
+            string move = line.substr(0, colon);
+            legalMoves.push_back(move);
+        }
+    }
+
+    return legalMoves;
 }
 
 
 
 
 // Evaluate the position's score from Stockfish
-int ChessEngineInterface::evaluatePosition(const string& fen) {
-    // TODO: Use "go depth 1" and extract score cp or score mate
-    return 0;
+// remember for future implementation depth param needs to be 2x puzzle to find mate (mate in 2 depth has to be 4)
+int ChessEngineInterface::evaluatePosition(const string& fen, const string& firstMove, int depth) {
+
+    sendCommand("position fen " + fen + " moves " + firstMove);
+    sendCommand("go depth " + to_string(depth));
+
+    string line;
+    while (getline(engineOutput, line)) {
+        if (line.find("info string", 0) == 0)
+            continue;
+        if (line.find("score mate") != string::npos) {
+            istringstream iss(line);
+            string token;
+
+            while (iss >> token) {
+                if (token == "mate") {
+                    int mate;
+                    iss >> mate;
+                    return mate;
+                }
+            }
+        }
+    }
+    return 100;
 }
 
 // Check if a position is checkmate
 bool ChessEngineInterface::isMate(const string& fen) {
-    // TODO: Look for "score mate 0"
+
+    sendCommand("position fen " + fen);
+    sendCommand("go depth 1");
+
+    string line;
+    while (getline(engineOutput, line)) {
+        if (line.find("info string", 0) == 0)
+            continue;
+        if (line.find("score mate 0") != string::npos) {
+            return true;
+        }
+    }
     return false;
 }
 

@@ -12,18 +12,18 @@ class Puzzle {
   private:
     string puzzleId;
     string fen;
-    string moves;
+    string firstMove;
     int rating;
     string theme;
 
   public:
-    Puzzle(const string& id, const string& fenStr, const string& movesStr, int rate, const string& themes)
-       : puzzleId(id), fen(fenStr), moves(movesStr), rating(rate), theme(themes) {}
+    Puzzle(const string& id, const string& fenStr, const string& firstMoveStr, int rate, const string& themes)
+       : puzzleId(id), fen(fenStr), firstMove(firstMoveStr), rating(rate), theme(themes) {}
 
     // Getters
     string getPuzzleId() const { return puzzleId; }
     string getFen() const { return fen; }
-    string getMoves() const { return moves; }
+    string getfirstMove() const { return firstMove; }
     int getRating() const { return rating; }
     string getTheme() const { return theme; }
 };

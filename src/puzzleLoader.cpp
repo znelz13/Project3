@@ -35,6 +35,10 @@ vector<Puzzle> loadPuzzlesFromFile()
     getline(lineStream, puzzleId, ',' );
     getline(lineStream, fen, ',' );
     getline(lineStream, moves, ',' );
+    istringstream moveStream(moves);
+    string firstMove;
+    moveStream >> firstMove;
+
     getline(lineStream, rate, ',' );
     getline(lineStream, garbage, ',' );
     getline(lineStream, garbage, ',' );
@@ -45,7 +49,7 @@ vector<Puzzle> loadPuzzlesFromFile()
 
     // checks if puzzle is mate puzzle before adding it in
     if (theme.find("mate") != string::npos){
-      allPuzzles.emplace_back(puzzleId, fen, moves, rating, theme); // Use emplace_back instead of push_back for performance
+      allPuzzles.emplace_back(puzzleId, fen, firstMove, rating, theme); // Use emplace_back instead of push_back for performance
 
       // Controls how many puzzles are added to the vector
       if (allPuzzles.size() == 250000)

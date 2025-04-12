@@ -7,7 +7,6 @@
 
 #include <string>
 #include <vector>
-#include <cstdio>
 #include <boost/process.hpp>
 
 namespace bp = boost::process;
@@ -20,14 +19,13 @@ private:
     boost::process::child engine;
 
     void sendCommand(const string& command);
-    string readResponse();
     void waitForReady();
 public:
     ChessEngineInterface();
     ~ChessEngineInterface();
 
     vector <string> getLegalMoves(const string& fen);
-    int evaluatePosition(const string& fen);
+    int evaluatePosition(const string& fen, const string& firstMove, int depth);
     bool isMate(const string& fen);
 
 };

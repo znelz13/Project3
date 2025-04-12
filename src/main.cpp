@@ -10,17 +10,17 @@ using namespace std;
 
 int main() {
 
-    ChessEngineInterface engine;
+    vector<Puzzle> allPuzzles = loadPuzzlesFromFile();
 
-    string testFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-    vector<string> moves = engine.getLegalMoves(testFEN);
-
-    cout << "Legal moves:\n";
-    for (const string& move : moves) {
-        cout << move << " ";
+    // Just print the first 10 puzzles for verification
+    for (int i = 0; i < 10 && i < allPuzzles.size(); ++i) {
+        const Puzzle& puzzle = allPuzzles[i];
+        cout << "Puzzle ID: " << puzzle.getPuzzleId() << endl;
+        cout << "FEN: " << puzzle.getFen() << endl;
+        cout << "First Move: " << puzzle.getfirstMove() << endl;
+        cout << "Rating: " << puzzle.getRating() << endl;
+        cout << "Theme: " << puzzle.getTheme() << endl;
+        cout << "------------------------" << endl;
     }
-    cout << endl;
-
-    return 0;
 
 }
