@@ -7,10 +7,6 @@
 
 
 
-class utils {
-
-};
-
 
 
 #endif //UTILS_H
