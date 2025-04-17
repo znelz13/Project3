@@ -1,6 +1,21 @@
 //
-// Created by zachary nelson  on 4/10/25.
+// Created by zachary nelson on 4/10/25.
 //
+// This header file declares functions for loading chess puzzles from a CSV file
+// and for filtering the puzzles based on mate-related themes. The functions use
+// the Puzzle class (declared in "puzzle.h") to store information such as the puzzle
+// ID, original FEN, the move(s) (e.g., the first move), rating, and theme.
+//
+// loadPuzzlesFromFile(int puzzleSize):
+//   - Opens the puzzle dataset file ("data/lichess_db_puzzle.csv").
+//   - Parses each line for puzzle attributes.
+//   - Filters out puzzles that are not mate puzzles (by checking the theme).
+//   - Limits the number of puzzles loaded to 'puzzleSize'.
+//   - Returns a vector of Puzzle objects with the parsed data.
+//
+// filterMateInNPuzzles(const std::vector<Puzzle>& allPuzzles, const std::string& mateIn):
+//   - Examines each Puzzle in the input vector.
+//   - Filters and returns only those puzzles whose theme contains the substring 'mateIn'.
 
 #ifndef PUZZLELOADER_H
 #define PUZZLELOADER_H
@@ -9,11 +24,13 @@
 #include <vector>
 #include <string>
 
-using namespace std;
+// Loads puzzles from the CSV dataset file, filtering for mate puzzles, and
+// returns up to puzzleSize puzzles as a vector of Puzzle objects.
+std::vector<Puzzle> loadPuzzlesFromFile(int puzzleSize);
 
-
-vector<Puzzle> loadPuzzlesFromFile();
-vector<Puzzle> filterMateInNPuzzles(const vector<Puzzle>& puzzles, const string& theme);
+// Filters the input vector of puzzles and returns a new vector containing only
+// those puzzles where the theme includes the given mateIn string.
+std::vector<Puzzle> filterMateInNPuzzles(const std::vector<Puzzle>& allPuzzles, const std::string& matIn);
 
 
 

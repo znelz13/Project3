@@ -8,10 +8,10 @@ git push origin main
 # Chess Puzzle Solver and Algorithm Comparison Project
 
 ## Overview
-Our project aims to compare two non-trivial algorithms—**Backtracking (recursive depth-first search)** and **A\* Search (heuristic-based search)**—for solving chess puzzles, specifically focusing on mate-in-N puzzles. We will integrate Stockfish to generate legal moves and evaluate positions. For visualization, instead of building an interactive real-time GUI, we will automatically capture board snapshots during the solving process and compile these into GIF outputs that show each puzzle’s solution sequence.
+Our project aims to compare two non-trivial algorithms—**Greedy Best-First Search** and **Beam Search**—for solving chess puzzles, specifically focusing on mate-in-N puzzles. We will integrate Stockfish to generate legal moves and evaluate positions. For visualization, instead of building an interactive real-time GUI, we will automatically capture board snapshots during the solving process and compile these into GIF outputs that show each puzzle’s solution sequence.
 
 ## Project Goals
-- **Compare Performance:** Speed, memory usage, and accuracy of Backtracking vs. A\* Search.
+- **Compare Performance:** Speed, memory usage, and accuracy of Greedy vs. Beam Search.
 - **Integrate Stockfish:** For legal move generation and position evaluation.
 - **Automate GIF Generation:** To display move sequences for each solved puzzle.
 
@@ -23,14 +23,15 @@ Project3/
 │   ├── puzzleLoader.h
 │   ├── chessEngineInterface.cpp // Interfaces with Stockfish (getLegalMoves(), isMate(), evaluatePosition()).
 │   ├── chessEngineInterface.h
-│   ├── solverBacktracking.cpp   // Implements recursive DFS (backtracking) for mate-in-N puzzles.
-│   ├── solverBacktracking.h
-│   ├── solverAStar.cpp          // Implements the A* solver (priority queue, heuristic functions, BoardState structure).
-│   ├── solverAStar.h
+│   ├── solverGreedy.cpp         // Implements greedy best-first search using Stockfish mate-in-N as heuristic.
+│   ├── solverGreedy.h
+│   ├── solverBeam.cpp           // Implements beam search with configurable beam width and cpEval fallback.
+│   ├── solverBeam.h
 │   ├── visualization.cpp        // Functions for generating GIFs from saved board snapshots.
 │   ├── visualization.h
 │   ├── utils.cpp                // Utility functions (FEN parsing, move conversion, logging).
-│   └── utils.h
+│   ├── utils.h
+│   └── puzzle.h
 ├── data/
 │   └── lichess_db_puzzle.csv              // Dataset of mate-in-N puzzles (FEN positions, and optionally move sequences).
 ├── docs/
@@ -46,7 +47,7 @@ Project3/
 - **Purpose:** Entry point of the application.
 - **Responsibilities:**
     - Load puzzles from the dataset.
-    - Choose and invoke the solvers (Backtracking and/or A\* Search).
+    - Choose and invoke the solvers (Greedy and/or Beam Search).
     - Trigger the GIF output process after a solution is found.
 - **Key Tasks:**
     - Initialize modules.
@@ -75,27 +76,27 @@ Project3/
     - Act as the intermediary to Stockfish.
     - Supply move generation and position evaluation services for solvers.
 
-### 4. **Backtracking Solver (solverBacktracking.cpp / solverBacktracking.h)**
+### 4. **Greedy Best-First Search (solverGreedy.cpp / solverGreedy.h)**
 - **Function:**
-    - `bool solvePuzzleBacktracking(const string &fen, int depth);`  
-      Recursively explores each move sequence (depth-first search) until mate is found (or other defined goal).
+    - `vector<string> solvePuzzleGreedy(const string &fen);`  
+      Uses greedy search to follow the move with the best `h(n)` value based on Stockfish’s mate-in-N.
 - **Responsibilities:**
-    - Traverse the move tree via recursion.
-    - Backtrack when a move sequence does not lead to a solution.
+    - Use a priority queue to expand only the best move at each level.
+    - Use `go depth` with `depth = N * 2` to detect mate reliably.
+    - Provide fallback scoring for non-mate moves.
 - **Optimizations:**
-    - Implement move ordering (e.g., checks first) and early exits upon finding a solution.
+    - Since puzzles are guaranteed to be mate-in-N after the first move, this approach is highly accurate and fast.
 
-### 5. **A* Solver (solverAStar.cpp / solverAStar.h)**
+### 5. **Beam Search (solverBeam.cpp / solverBeam.h)**
 - **Functions:**
-    - `vector<string> solvePuzzleAStar(const string &fen);`  
-      Uses A* Search to find the optimal sequence of moves leading to mate.
-    - `int heuristic(const string &fen);`  
-      Computes a heuristic estimate (e.g., based on Stockfish’s evaluation, material count).
+    - `vector<string> solvePuzzleBeam(const string &fen, int beamWidth);`  
+      Keeps the top *k* candidate nodes at each level using `cpEval` when multiple non-mating moves are tied.
 - **Responsibilities:**
-    - Use a priority queue to prioritize promising move sequences.
-    - Reduce node expansion compared to exhaustive backtracking.
+    - Provide a middle ground between full brute-force and greedy.
+    - Use Stockfish evaluation (`mate-in-N` or centipawn score) to guide beam selection.
 - **Optimizations:**
-    - Fine-tune the heuristic for performance improvements.
+    - Tunable beam width allows balancing speed vs. completeness.
+    - Slightly slower than Greedy but explores more branches.
 
 ### 6. **Visualization Module (visualization.cpp / visualization.h) — GIF Generation Only**
 - **Functions:**
@@ -128,30 +129,31 @@ Project3/
 
 Assign tasks as follows:
 
-| **Module**                    | **Responsibilities**                                     | **Assigned To** |
-|-------------------------------|----------------------------------------------------------|-----------------|
-| **Puzzle Loader**             | Parse datasets and filter puzzles                        | zack done       |
-| **Chess Engine Interface**    | Integrate Stockfish for move generation & evaluation       |                 |
-| **Backtracking Solver**       | Implement DFS/backtracking logic and optimizations         |                 |
-| **A* Solver**                 | Implement A* search and tune heuristics                   |                 |
+| **Module**                         | **Responsibilities**                                     | **Assigned To** |
+|------------------------------------|----------------------------------------------------------|-----------------|
+| **Puzzle Loader**                  | Parse datasets and filter puzzles                        | zack done       |
+| **Chess Engine Interface**         | Integrate Stockfish for move generation & evaluation     | done            |
+| **Greedy Search Solver**           | Implement greedy best-first search with mate eval        |                 |
+| **Beam Search Solver**             | Implement beam search with top-k pruning and cpEval      |                 |
 | **Visualization (GIF Generation)** | Render board snapshots, capture frames, and merge into GIF |                 |
-| **Utility Functions**         | FEN parsing, move conversion, logging                    |                 |
-| **Documentation & Integration** | Maintain README, merge modules, final testing             |                 |
+| **Utility Functions**              | FEN parsing, move conversion, logging                    |                 |
+| **Documentation & Integration**    | Maintain README, merge modules, final testing             |                 |
 
 ## Milestones and Timeline
 
 - **Milestone 1: Dataset & Puzzle Loader (Due: MM/DD/YYYY)**
-    - DONE
+    - ✅ DONE
     - Download dataset and implement puzzle loader.
 
 - **Milestone 2: Stockfish Integration (Due: MM/DD/YYYY)**
+    - ✅ DONE
     - Develop `getLegalMoves()`, `isMate()`, and `evaluatePosition()` functions.
 
-- **Milestone 3: Backtracking Solver (Due: MM/DD/YYYY)**
-    - Create and test the recursive DFS solver on simple mate-in-N puzzles.
+- **Milestone 3: Greedy Solver (Due: MM/DD/YYYY)**
+    - Implement greedy best-first search with mate-in-N scoring.
 
-- **Milestone 4: A* Solver (Due: MM/DD/YYYY)**
-    - Implement A* search with custom heuristic and benchmark against Backtracking.
+- **Milestone 4: Beam Search Solver (Due: MM/DD/YYYY)**
+    - Implement beam search with cpEval fallback.
 
 - **Milestone 5: GIF Visualization Module (Due: MM/DD/YYYY)**
     - Implement board rendering and frame capture using SFML.
