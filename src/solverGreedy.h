@@ -5,10 +5,13 @@
 #ifndef solverGreedy_H
 #define solverGreedy_H
 
-
+#include <vector>
+#include <string>
+#include "Puzzle.h"
+#include "chessEngineInterface.h"
 
 class solverGreedy {
-
+    vector<string> solvePuzzleGreedy(const Puzzle &puzzle);
 };
 
 
