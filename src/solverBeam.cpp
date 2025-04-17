@@ -6,68 +6,98 @@
 
 using namespace std;
 
-vector<string> solverBeam::solvePuzzleBeam(const Puzzle &puzzle, int beamWidth) {
+vector<vector<string>> solverBeam::solvePuzzleBeam(const Puzzle &puzzle, int beamWidth) {
     ChessEngineInterface chessEngineInterface;
 
-    // Fens stores the current iterations positions, newFens is a placeholder that stores the next iterations positions.
-    // Once all positions have played their move, fens is set equal to newFens and newFens is cleared
-    vector<string> fens;
-    vector<string> newFens;
+    vector<vector<string>> moves;
 
-    fens.push_back(chessEngineInterface.fenUpdater(puzzle.getFen(), puzzle.getfirstMove()));
-    
-    vector<string> legalMoves;
+    // Puts the first move in all branches
+    vector<string> firstMove;
+    firstMove.push_back(puzzle.getfirstMove());
+    vector<pair<string, int>> scoredMoves;
+    vector<string> rankedMoves;
+    for(int i = 0; i < puzzle.getMateIn() * beamWidth; i++) {
+        moves.push_back(firstMove);
+    }
 
-    // Stores the best moves in a position, with bestMoves[0] being the best
-    pair<string, int> bestMoves[beamWidth];
     string fen;
-    for(int i = puzzle.getMateIn(); i > 0; i++) {
-        for(int branches = 0; branches < (int)fens.size(); branches++){
+    string move;
+    string opponentMove;
+    int depth = 1;
+    for(int mateIn = puzzle.getMateIn(); mateIn > 0; mateIn--) {
+        for(int branch = 0; branch < beamWidth; branch++) {
 
-            // Sets bestMoves[0] to the best move in the position
-            bestMoves[0].first = chessEngineInterface.bestMove(fens[branches], i * 2);
-
-            legalMoves = chessEngineInterface.getLegalMoves(fens[branches]);
-
-            // Sets the scores of the plaeholders to a bad arbitrary value so that they are immediately replaced
-            for(int j = 1; j < beamWidth; j++) {
-                bestMoves[j].second = 100000;
+            // Gets Fen up to current move
+            fen = puzzle.getFen();
+            for(int numMoves = 0; numMoves < moves[branch].size(); numMoves++) {
+                fen = chessEngineInterface.fenUpdater(fen, moves[branch][numMoves]);
             }
 
-            // Checks every possible move for its eval score
-            for(int j = 0; j < (int)legalMoves.size(); j++) {
+            scoredMoves = heuristic(fen, mateIn);
+            rankedMoves = rankMoves(scoredMoves);
+            
+            for(int beam = 0; beam < (int)moves.size(); beam += (int)(moves.size() / (beamWidth * depth))) {
 
-                // Finds the number of moves set by the beamwidth
-                for(int k = 1; k < beamWidth; k++) {
-                    if(legalMoves[k] != bestMoves[0].first) {
-                        int score = chessEngineInterface.evaluatePosition(fen, legalMoves[j], i * 2).scoreCp;
-                        if(score < bestMoves[k].second) {
+                move = rankedMoves[beam];
+                
+                // Beam algorithm move
+                moves[branch].push_back(move);
+                fen = chessEngineInterface.fenUpdater(fen, move);
 
-                            // Pushes moves ranked lower down 1
-                            for(int l = beamWidth - 1; l > k; l++) {
-                                bestMoves[l] = bestMoves[l - 1];
-                            }
-
-                            EvalResult eval = chessEngineInterface.evaluatePosition(fen, legalMoves[j], i * 2);
-                            bestMoves[k].first = legalMoves[k];
-                            bestMoves[k].second = eval.scoreCp;
-                        }
-                    }
+                // Ensures that the opponent doesn't play after mate has been reached
+                if(mateIn == 1) {
+                    break;
                 }
-            }
 
-            // Update fens
-            for(int j = 0; j < beamWidth; j++) {
-                newFens.emplace_back(chessEngineInterface.fenUpdater(fens[branches], bestMoves[j].first));
-            }
-
-            // Computer plays best move against
-            for(int j = 0; j < beamWidth; j++) {
-                newFens.emplace_back(chessEngineInterface.fenUpdater(fens[branches], bestMoves[j].first));
+                opponentMove = chessEngineInterface.bestMove(fen, mateIn * 2 - 2);
+                moves[branch].push_back(opponentMove);
             }
         }
-        
-        fens = newFens;
-        newFens.clear();
+        depth++;
     }
+
+    return moves;
+}
+
+vector<pair<string, int>> solverBeam::heuristic(const string &fen, int depth) {
+    ChessEngineInterface chessEngineInterface;
+
+    vector<string> legalMoves = chessEngineInterface.getLegalMoves(fen);
+    vector<pair<string, int>> scoredMoves;
+
+    EvalResult score;
+
+    for(int i = 0; i < (int)legalMoves.size(); i++) {
+        score = chessEngineInterface.evaluatePosition(fen, legalMoves[i], depth * 2 - 1);
+        if(score.mate) {
+            scoredMoves.emplace_back(make_pair(legalMoves[i], -10000000));
+        }
+        else {
+            scoredMoves.emplace_back(make_pair(legalMoves[i], score.scoreCp));
+        }
+    }
+    return scoredMoves;
+}
+
+vector<string> rankMoves(vector<pair<string, int>> scoredMoves) {
+    bool isSorted;
+    pair<string, int> placeholder;
+    while(!isSorted) {
+        isSorted = true;
+        for(int i = 0; i < (int)scoredMoves.size() - 1; i++) {
+            if(scoredMoves[i].second > scoredMoves[i + 1].second) {
+                placeholder = scoredMoves[i];
+                scoredMoves[i] = scoredMoves[i + 1];
+                scoredMoves[i + 1] = placeholder;
+                isSorted = false;
+            }
+        }
+    }
+
+    vector<string> rankedMoves;
+    for(int i = 0; i < (int)scoredMoves.size(); i++) {
+        rankedMoves.emplace_back(scoredMoves[i].first);
+    }
+
+    return rankedMoves;
 }

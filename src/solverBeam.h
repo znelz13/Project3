@@ -9,10 +9,14 @@
 
 #include <vector>
 #include <string>
-#include <utility?
+#include <utility>
+#include <unordered_map>
+#include "Puzzle.h"
 
 class solverBeam {
-    vector<string> solvePuzzleBeam(const string &fen, int beamWidth);
+    vector<vector<string>> solvePuzzleBeam(const Puzzle &puzzle, int beamWidth);
+    vector<pair<string, int>> heuristic(const string &fen, int depth);
+    vector<string> rankMoves(vector<pair<string, int>> scoredMoves);
 };
 
 
