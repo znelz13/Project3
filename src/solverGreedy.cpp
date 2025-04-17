@@ -28,6 +28,7 @@ vector<string> solverGreedy::solvePuzzleGreedy(const Puzzle &puzzle) {
             return moves;
         }
 
+        // Opponent move
         opponentMove = chessEngineInterface.bestMove(fen, i * 2 - 2);
         moves.push_back(opponentMove);
         fen = chessEngineInterface.fenUpdater(fen, opponentMove);
