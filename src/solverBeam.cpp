@@ -25,7 +25,7 @@ vector<vector<string>> solverBeam::solvePuzzleBeam(const Puzzle &puzzle, int bea
     string opponentMove;
     int depth = 1;
     for(int mateIn = puzzle.getMateIn(); mateIn > 0; mateIn--) {
-        for(int branch = 0; branch < beamWidth; branch++) {
+        for(int branch = 0; branch < (int)moves.size(); branch += ((int)moves.size() / (depth * beamWidth))) {
 
             // Gets Fen up to current move
             fen = puzzle.getFen();
@@ -35,22 +35,26 @@ vector<vector<string>> solverBeam::solvePuzzleBeam(const Puzzle &puzzle, int bea
 
             scoredMoves = heuristic(fen, mateIn);
             rankedMoves = rankMoves(scoredMoves);
-            
-            for(int beam = 0; beam < (int)moves.size(); beam += (int)(moves.size() / (beamWidth * depth))) {
 
-                move = rankedMoves[beam];
-                
-                // Beam algorithm move
-                moves[branch].push_back(move);
-                fen = chessEngineInterface.fenUpdater(fen, move);
+            int splitNum = 0;
+            for(int split = branch; split < (branch + ((int)moves.size() / (depth * beamWidth))); split += (int)(moves.size() / (beamWidth * beamWidth * depth))) {
 
-                // Ensures that the opponent doesn't play after mate has been reached
-                if(mateIn == 1) {
-                    break;
+                for(int i = split; i < split + (int)(moves.size() / (beamWidth * beamWidth * depth)); i++) {
+                    move = rankedMoves[splitNum];
+
+                    // Beam algorithm move
+                    moves[i].push_back(move);
+                    fen = chessEngineInterface.fenUpdater(fen, move);
+
+                    // Ensures that the opponent doesn't play after mate has been reached
+                    if(mateIn == 1) {
+                        break;
+                    }
+
+                    opponentMove = chessEngineInterface.bestMove(fen, mateIn * 2 - 2);
+                    moves[i].push_back(opponentMove);
                 }
-
-                opponentMove = chessEngineInterface.bestMove(fen, mateIn * 2 - 2);
-                moves[branch].push_back(opponentMove);
+                splitNum++;
             }
         }
         depth++;
