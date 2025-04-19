@@ -71,8 +71,10 @@ vector<pair<string, int>> solverBeam::heuristic(const string &fen, int depth) {
 
     EvalResult score;
 
+    string newFen;
     for(int i = 0; i < (int)legalMoves.size(); i++) {
-        score = chessEngineInterface.evaluatePosition(fen, legalMoves[i], depth * 2 - 1);
+        newFen = chessEngineInterface.fenUpdater(fen, legalMoves[i]);
+        score = chessEngineInterface.evaluatePosition(newFen, depth * 2 - 1);
         if(score.mate) {
             scoredMoves.emplace_back(make_pair(legalMoves[i], -10000000));
         }
