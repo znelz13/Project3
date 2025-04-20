@@ -6,6 +6,9 @@
 #include <boost/process.hpp>
 #include <iostream>
 #include <sstream>
+#include <thread>
+#include <memory>
+#include <chrono>
 
 
 namespace bp = boost::process;
@@ -31,10 +34,12 @@ ChessEngineInterface::ChessEngineInterface()
  *  - Sends the "quit" command to Stockfish to terminate the engine.
  *  - Calls engine.wait() to block until the Stockfish process has finished terminating.
  */
-ChessEngineInterface::~ChessEngineInterface() {
-    engineInput << "quit" << endl;
-    engine.wait();
+ChessEngineInterface::~ChessEngineInterface()
+{
+    engineInput << "quit\n" << std::flush;
+    engine.wait();          // safe: streams still alive
 }
+
 
 /*
  * sendCommand
@@ -178,13 +183,17 @@ string ChessEngineInterface::fenUpdater(const string& fen, const string& move) {
     sendCommand("d");
 
     string line;
+    string updatedFen;
     while (getline(engineOutput, line)) {
         if (line.find("Fen:") != string::npos) {
             // Extract the updated FEN by skipping past "Fen:" (which is 5 characters including the space).
-            return line.substr(line.find("Fen:") + 5);
+            updatedFen = line.substr(line.find("Fen:") + 5);
+        }
+        else if (line.find("Checkers:") != string::npos) {
+            break;
         }
     }
-    return "";
+    return updatedFen;
 }
 
 /*

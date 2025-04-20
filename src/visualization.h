@@ -7,6 +7,7 @@
 #include <SFML/Graphics.hpp>
 #pragma once
 
+void unloadPieceTextures();
 void loadPieceTextures();
 void drawBoard(sf::RenderWindow &window);
 void drawPieces(sf::RenderWindow &window, const std::string &fen);

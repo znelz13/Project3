@@ -42,8 +42,7 @@ private:
     // Streams for capturing output and feeding input to Stockfish.
     boost::process::ipstream engineOutput;
     boost::process::opstream engineInput;
-    // The child process representing the Stockfish engine.
-    boost::process::child engine;
+    boost::process::child    engine;
 
     // Sends a command string to Stockfish.
     void sendCommand(const std::string& command);

@@ -26,13 +26,7 @@
 
 // Loads puzzles from the CSV dataset file, filtering for mate puzzles, and
 // returns up to puzzleSize puzzles as a vector of Puzzle objects.
-std::vector<Puzzle> loadPuzzlesFromFile(int puzzleSize);
-
-// Filters the input vector of puzzles and returns a new vector containing only
-// those puzzles where the theme includes the given mateIn string.
-std::vector<Puzzle> filterMateInNPuzzles(const std::vector<Puzzle>& allPuzzles, const std::string& matIn);
-
-
+std::vector<Puzzle> loadPuzzlesFromFile(int puzzleSize, int mateInN);
 
 
 
