@@ -52,8 +52,8 @@ vector<Puzzle> loadPuzzlesFromFile(int puzzleSize, int mateInN)
         getline(lineStream, garbage, ',' );
         getline(lineStream, theme, ',' );
 
-        // Filter puzzles: Only use puzzles where the theme contains "mate"
-        if (theme.find("mate") != string::npos){
+        // Filter puzzles: Only use puzzles where the theme contains "mateInN"
+        if (theme.find("mateIn" + to_string(mateInN)) != string::npos){
             int rating = stoi(rate);
 
             // Extract the first move from the moves string using a string stream.
