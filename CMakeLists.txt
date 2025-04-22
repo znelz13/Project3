@@ -48,7 +48,7 @@ add_executable(Main
 
 target_link_libraries(Main
         PRIVATE
-        Boost::system        # <— now known thanks to find_package
+        Boost::system
         SFML::Graphics
         SFML::Window
         SFML::System

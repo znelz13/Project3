@@ -107,6 +107,10 @@ vector<string> ChessEngineInterface::getLegalMoves(const string& fen) {
  */
 EvalResult ChessEngineInterface::evaluatePosition(const string& fen, const int depth) {
 
+    sendCommand("ucinewgame");
+    sendCommand("isready");
+    waitForReady();
+
     sendCommand("position fen " + fen);
     sendCommand("go depth " + to_string(depth));
 

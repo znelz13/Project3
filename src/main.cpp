@@ -8,6 +8,7 @@
 #include <filesystem>
 
 #include "puzzleLoader.h"
+#include "solverBeam.h"
 #include "solverGreedy.h"
 #include "chessEngineInterface.h"
 #include "visualization.h"
@@ -85,6 +86,40 @@ int main() {
 
 
             generateSolutionGIF("greedy_" + id + ".gif");
+        }
+
+        // --- b) Beam‑width‑3 solver ---
+        {
+            auto   t0    = std::chrono::steady_clock::now();
+            auto   moves = solverBeam().solvePuzzleBeam(engine, p, mateIn, /*beamWidth=*/3);
+            auto   elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+                               std::chrono::steady_clock::now() - t0
+                             ).count();
+
+            std::cout << "[Beam‑3] moves: " << moves.size()
+                      << ", time: "   << elapsed << " ms\n";
+
+            int         frame = 0;
+            std::string fen   = startFen;
+
+            // Frame 0 : initial position
+            window.clear();
+            drawBoard(window);
+            drawPieces(window, fen);
+            saveFrame(window, frame++);
+            window.display();
+
+            // Frames 1…N : play out the beam solution
+            for (const auto& mv : moves) {
+                fen = engine.fenUpdater(fen, mv);
+                window.clear();
+                drawBoard(window);
+                drawPieces(window, fen);
+                saveFrame(window, frame++);
+                window.display();
+            }
+
+            generateSolutionGIF("beam_" + id + ".gif");
         }
     }
 

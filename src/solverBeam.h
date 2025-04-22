@@ -7,15 +7,14 @@
 
 #include "chessEngineInterface.h"
 
+#include "chessEngineInterface.h"
+#include "puzzle.h"
 #include <vector>
 #include <string>
-#include <utility>
-#include <unordered_map>
-#include "puzzle.h"
 
 class solverBeam {
 public:
-    std::vector<std::vector<std::string>> solvePuzzleBeam(const Puzzle &puzzle, int mateInN);
+    std::vector<std::string> solvePuzzleBeam(ChessEngineInterface& engine, const Puzzle& puzzle, int mateInN, int beamWidth = 3);
 };
 
 
