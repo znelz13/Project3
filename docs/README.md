@@ -3,7 +3,7 @@ Running this code requires the user to have SFML 3.0 and Boost installed.
 
 Additionally, the user must download the following chess puzzle database:
 https://database.lichess.org/#puzzles
-The file comes in a compressed format, which can be decompressed differently depending on OS:
+The file comes in a compressed format, which can be decompressed differently depending on OS
 Windows:
 Right clicking the file and extracting via 7Zip should decompress the file and return the .csv file
 
