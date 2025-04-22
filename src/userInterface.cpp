@@ -2,6 +2,8 @@
 #include <SFML/Window/Event.hpp>
 #include <string>
 #include <iostream>
+#include <sstream>
+#include <chrono>
 #include "puzzleLoader.h"
 #include "solverGreedy.h"
 #include "solverBeam.h"
@@ -10,14 +12,14 @@
 
 using namespace std;
 
-enum PuzzleType { MATE_IN_1, MATE_IN_2, MATE_IN_3 };
+enum PuzzleType { MATE_IN_1, MATE_IN_2, MATE_IN_3, MATE_IN_4 };
 enum AlgorithmType { GREEDY, BEAM };
 
-void runSolver(int puzzleCount, int mateIn, AlgorithmType algorithm) {
+long long runSolver(int puzzleCount, int mateIn, AlgorithmType algorithm) {
     auto puzzles = loadPuzzlesFromFile(puzzleCount, mateIn);
     if (puzzles.empty()) {
         cerr << "No puzzles loaded; exiting.\n";
-        return;
+        return -1;
     }
 
     ChessEngineInterface engine;
@@ -30,20 +32,25 @@ void runSolver(int puzzleCount, int mateIn, AlgorithmType algorithm) {
     window.create(sf::VideoMode({wSize, wSize}), "Chess Puzzle Solver");
     loadPieceTextures();
 
+    long long totalElapsed = 0;
+
     for (auto &p : puzzles) {
         const auto id = p.getPuzzleId();
         const auto startFen = p.getOriginalFen();
+        cout << "\n=== Puzzle " << id << " (matein" << mateIn << ") ===\n";
 
-        vector<string> moves;
         auto t0 = chrono::steady_clock::now();
+        vector<string> moves;
 
-        if (algorithm == GREEDY)
+        if (algorithm == GREEDY) {
             moves = solverGreedy().solvePuzzleGreedy(engine, p, mateIn);
-        else
+        } else {
             moves = solverBeam().solvePuzzleBeam(engine, p, mateIn);
+        }
 
         auto elapsed = chrono::duration_cast<chrono::milliseconds>(
                 chrono::steady_clock::now() - t0).count();
+        totalElapsed += elapsed;
 
         cout << (algorithm == GREEDY ? "[Greedy]" : "[Beam]")
              << " moves: " << moves.size()
@@ -71,7 +78,9 @@ void runSolver(int puzzleCount, int mateIn, AlgorithmType algorithm) {
     }
 
     unloadPieceTextures();
+    return totalElapsed;
 }
+
 
 int launchSolverUI() {
     constexpr int windowWidth = 800;
@@ -124,15 +133,17 @@ int launchSolverUI() {
     sf::Text mate1(font, "( ) Mate in 1", 20);
     sf::Text mate2(font, "( ) Mate in 2", 20);
     sf::Text mate3(font, "( ) Mate in 3", 20);
+    sf::Text mate4(font, "( ) Mate in 4", 20);
     sf::Text greedy(font, "( ) Greedy", 20);
     sf::Text beam(font, "( ) Beam", 20);
     mate1.setPosition({centerX - 120, baseY + 2 * lineHeight});
     mate2.setPosition({centerX, baseY + 2 * lineHeight});
     mate3.setPosition({centerX + 120, baseY + 2 * lineHeight});
+    mate4.setPosition({centerX + 240, baseY + 2 * lineHeight});
     greedy.setPosition({centerX - 20, baseY + 3 * lineHeight});
     beam.setPosition({centerX + 120, baseY + 3 * lineHeight});
 
-    for (auto* option : {&mate1, &mate2, &mate3, &greedy, &beam}) {
+    for (auto* option : {&mate1, &mate2, &mate3, &mate4, &greedy, &beam}) {
         option->setFillColor(sf::Color(30, 30, 30));
     }
 
@@ -147,6 +158,10 @@ int launchSolverUI() {
     startText.setFillColor(sf::Color::White);
     startText.setPosition({centerX - 60, static_cast<float>(baseY + 4.5 * lineHeight + 10)});
 
+    sf::Text timeResult(font, "", 18);
+    timeResult.setFillColor(sf::Color(40, 40, 40));
+    timeResult.setPosition({centerX - 100, static_cast<float>(baseY + 5.5 * lineHeight)});
+
     while (window.isOpen()) {
         while (const std::optional event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>())
@@ -159,16 +174,24 @@ int launchSolverUI() {
                 if (mate1.getGlobalBounds().contains(mouse)) puzzleType = MATE_IN_1;
                 if (mate2.getGlobalBounds().contains(mouse)) puzzleType = MATE_IN_2;
                 if (mate3.getGlobalBounds().contains(mouse)) puzzleType = MATE_IN_3;
+                if (mate4.getGlobalBounds().contains(mouse)) puzzleType = MATE_IN_4;
                 if (greedy.getGlobalBounds().contains(mouse)) algorithm = GREEDY;
                 if (beam.getGlobalBounds().contains(mouse)) algorithm = BEAM;
 
                 if (startButton.getGlobalBounds().contains(mouse)) {
                     try {
                         int count = stoi(numPuzzles);
-                        int mate = (puzzleType == MATE_IN_1) ? 1 : (puzzleType == MATE_IN_2 ? 2 : 3);
-                        runSolver(count, mate, algorithm);
+                        int mate = (puzzleType == MATE_IN_1) ? 1 :
+                                   (puzzleType == MATE_IN_2) ? 2 :
+                                   (puzzleType == MATE_IN_3) ? 3 : 4;
+                        long long totalTime = runSolver(count, mate, algorithm);
+                        if (totalTime >= 0) {
+                            stringstream ss;
+                            ss << "Total solve time: " << totalTime << " ms";
+                            timeResult.setString(ss.str());
+                        }
                     } catch (...) {
-                        cerr << "Invalid numeric input." << endl;
+                        cerr << "invalid input" << endl;
                     }
                 }
             }
@@ -189,6 +212,7 @@ int launchSolverUI() {
         mate1.setString((puzzleType == MATE_IN_1 ? "(o) " : "( ) ") + string("Mate in 1"));
         mate2.setString((puzzleType == MATE_IN_2 ? "(o) " : "( ) ") + string("Mate in 2"));
         mate3.setString((puzzleType == MATE_IN_3 ? "(o) " : "( ) ") + string("Mate in 3"));
+        mate4.setString((puzzleType == MATE_IN_4 ? "(o) " : "( ) ") + string("Mate in 4"));
         greedy.setString((algorithm == GREEDY ? "(o) " : "( ) ") + string("Greedy"));
         beam.setString((algorithm == BEAM ? "(o) " : "( ) ") + string("Beam"));
 
@@ -201,11 +225,13 @@ int launchSolverUI() {
         window.draw(mate1);
         window.draw(mate2);
         window.draw(mate3);
+        window.draw(mate4);
         window.draw(algoLabel);
         window.draw(greedy);
         window.draw(beam);
         window.draw(startButton);
         window.draw(startText);
+        window.draw(timeResult);
         window.display();
     }
     return 0;
