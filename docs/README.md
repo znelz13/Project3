@@ -30,9 +30,4 @@ This will return the "lichess_db_puzzle.csv" file
 
 The .csv file can then be placed in Project3/data/
 
-To run the program, run the Main configuration and the user interface will prompt usage.
-
-# A* Algorithm
-
-
-# Brute Force Algorithm
+To run the program, run the Main configuration and the user interface will prompt usage on solving chess puzzle using the different algorithms.
