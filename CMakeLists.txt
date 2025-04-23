@@ -40,6 +40,7 @@ add_executable(Main
         src/main.cpp
         src/puzzleLoader.cpp
         src/chessEngineInterface.cpp
+        src/userInterface.cpp
         src/solverBeam.cpp
         src/solverGreedy.cpp
         src/visualization.cpp

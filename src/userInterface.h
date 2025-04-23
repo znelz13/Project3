@@ -21,7 +21,7 @@ enum AlgorithmType {
 
 int launchSolverUI();
 
-void runSolver(int puzzleCount, int mateIn, AlgorithmType algorithm);
+
 
 #endif // CHESS_UI_H
 

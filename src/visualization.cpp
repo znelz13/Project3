@@ -13,12 +13,11 @@ static map<char, sf::Texture> pieceTextures;
 
 void unloadPieceTextures()
 {
-    pieceTextures.clear();   // destroys every sf::Texture now
+    pieceTextures.clear();
 }
 
 void loadPieceTextures() {
     namespace fs = std::filesystem;
-    // Determine the project root and resource directory at runtime
     fs::path cppPath   = fs::path(__FILE__);
     fs::path project   = cppPath.parent_path().parent_path();
     fs::path piecesDir = project / "src" / "res" / "pieces";
