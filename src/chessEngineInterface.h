@@ -1,23 +1,6 @@
 //
 // Created by zachary nelson on 4/10/25.
 //
-// ChessEngineInterface.h
-// ------------------------
-// This header defines the ChessEngineInterface class, which encapsulates all interactions
-// with the Stockfish chess engine using Boost.Process. This class is responsible for:
-//   - Sending commands to Stockfish via the UCI protocol
-//   - Reading and parsing Stockfish responses
-//   - Providing useful functions such as:
-//         - getLegalMoves(): Returns a vector of legal moves for a given FEN position.
-//         - evaluatePosition(): Evaluates a position at a specified search depth and returns
-//                               an evaluation (mate or centipawn score) encapsulated in the EvalResult struct.
-//         - isMate(): Checks if a position is an immediate checkmate.
-//         - fenUpdater(): Applies a move to a given FEN and returns the updated FEN using Stockfish.
-//         - bestMove(): Retrieves the best move for a given FEN position at a specified depth.
-//
-// The EvalResult struct is also defined here to neatly package evaluation results.
-// It distinguishes between mate evaluations (scoreMate) and centipawn evaluations (scoreCp).
-//
 
 #ifndef CHESSENGINEINTERFACE_H
 #define CHESSENGINEINTERFACE_H
@@ -28,7 +11,7 @@
 
 namespace bp = boost::process;
 
-// EvalResult encapsulates the result of a position evaluation.
+// EvalResult holds the result of a position evaluation.
 //   - If 'mate' is true, then scoreMate represents a mate-in-N value.
 //   - If 'mate' is false, then scoreCp holds the centipawn (cp) evaluation.
 struct EvalResult {

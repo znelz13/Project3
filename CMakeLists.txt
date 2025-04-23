@@ -44,7 +44,6 @@ add_executable(Main
         src/solverBeam.cpp
         src/solverGreedy.cpp
         src/visualization.cpp
-        src/utils.cpp
 )
 
 target_link_libraries(Main

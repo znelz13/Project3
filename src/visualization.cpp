@@ -7,13 +7,12 @@
 #include <filesystem>
 
 using namespace std;
-
-// Global texture map
+// stores loaded piece images
 static map<char, sf::Texture> pieceTextures;
 
 void unloadPieceTextures()
 {
-    pieceTextures.clear();
+    pieceTextures.clear();  // free all textures
 }
 
 void loadPieceTextures() {
@@ -22,6 +21,7 @@ void loadPieceTextures() {
     fs::path project   = cppPath.parent_path().parent_path();
     fs::path piecesDir = project / "src" / "res" / "pieces";
 
+    // map piece symbols to image filenames
     map<char, string> textureFiles = {
         {'K', "white_king.png"},   {'Q', "white_queen.png"},
         {'R', "white_rook.png"},   {'B', "white_bishop.png"},
@@ -38,7 +38,7 @@ void loadPieceTextures() {
             cerr << "failed to load texture '" << fileName
                  << "' (tried: " << fullPath << ")\n";
         } else {
-            pieceTextures[symbol] = std::move(tex);
+            pieceTextures[symbol] = std::move(tex);     // store on success
         }
     }
 }
@@ -48,6 +48,7 @@ void drawBoard(sf::RenderWindow& window) {
     sf::Color light(240, 217, 181);
     sf::Color dark(181, 136,  99);
 
+    // draw 8×8 chessboard
     for (int row = 0; row < 8; ++row) {
         for (int col = 0; col < 8; ++col) {
             sf::RectangleShape tile(sf::Vector2f(tileSize, tileSize));
@@ -60,7 +61,7 @@ void drawBoard(sf::RenderWindow& window) {
 
 void drawPieces(sf::RenderWindow& window, const std::string& fen) {
     const float tileSize = 80.f;
-    // Extract only the placement portion (before first space)
+    // extract placement section of FEN
     size_t pos = fen.find(' ');
     string placement = (pos == string::npos ? fen : fen.substr(0, pos));
 
@@ -72,20 +73,19 @@ void drawPieces(sf::RenderWindow& window, const std::string& fen) {
         return;
     }
 
+    // draw each piece on its square
     for (int row = 0; row < 8; ++row) {
         const auto& rank = ranks[row];
         int col = 0;
         for (char c : rank) {
             if (isdigit(c)) {
-                col += (c - '0');
+                col += (c - '0');   // skip empty squares
             } else {
                 auto it = pieceTextures.find(c);
                 if (it != pieceTextures.end()) {
                     sf::Sprite sprite(it->second);
-                    // Center the sprite
-                    auto texSize = it->second.getSize(); // Vector2u
+                    auto texSize = it->second.getSize();
                     sprite.setOrigin({ texSize.x / 2.f, texSize.y / 2.f });
-                    // Position at center of the square
                     sprite.setPosition({
                         col * tileSize + tileSize / 2.f,
                         row * tileSize + tileSize / 2.f
@@ -112,6 +112,7 @@ void saveFrame(sf::RenderWindow& window, int frameNumber) {
 }
 
 void generateSolutionGIF(const string& outputFile) {
+    // use ImageMagick to combine frames into GIF
     string command = "magick -delay 80 -loop 0 frame_*.png " + outputFile;
     if (system(command.c_str()) == 0) {
         cout << "gif generated: " << outputFile << endl;

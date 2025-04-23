@@ -12,6 +12,7 @@
 
 class solverGreedy {
 public:
+    // return move sequence to mate in mateInN using greedy evaluation
     std::vector<std::string> solvePuzzleGreedy(ChessEngineInterface& engine, const Puzzle &puzzle, int mateInN);
 };
 

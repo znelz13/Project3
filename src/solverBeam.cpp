@@ -1,5 +1,5 @@
 //
-// Created by zachary nelson  on 4/10/25.
+// Created by zachary nelson on 4/10/25.
 //
 
 #include "chessEngineInterface.h"
@@ -11,100 +11,98 @@
 using namespace std;
 
 struct BeamNode {
-    vector<string> moves;
-    string         fen;
-    int            score;
+    vector<string> moves;  // sequence of moves so far
+    string         fen;    // current position
+    int            score;  // evaluation score
 };
 
-vector<string> solverBeam::solvePuzzleBeam(ChessEngineInterface& engine, const Puzzle& puzzle, int mateInN, int beamWidth) {
+vector<string> solverBeam::solvePuzzleBeam(
+    ChessEngineInterface& engine,
+    const Puzzle& puzzle,
+    int mateInN,
+    int beamWidth
+) {
     vector<BeamNode> beam;
     {
         BeamNode start;
         start.moves.push_back(puzzle.getFirstMove());
-        start.fen = puzzle.getFen();
+        start.fen   = puzzle.getFen();
         start.score = 0;
-        beam.push_back(start);
+        beam.push_back(start);  // seed beam with initial move
     }
 
-    int depth = mateInN * 4;
-    bool isWhite;
-    if (puzzle.getFen().find("w") != string::npos) {
-        isWhite = true;
-    }
-    else {
-        isWhite = false;
-    }
+    int depth = mateInN * 4;  // search depth
+    bool isWhite = (puzzle.getFen().find("w") != string::npos);
 
-    for (int algoMoveCount = 0; algoMoveCount < mateInN; ++algoMoveCount) {
-        vector<BeamNode> childrenCandidates;
-        for (BeamNode beamNode : beam) {
-            for (string& mv : engine.getLegalMoves(beamNode.fen)) {
-                BeamNode child = beamNode;
+    // perform beam search over mateInN plies
+    for (int step = 0; step < mateInN; ++step) {
+        vector<BeamNode> candidates;
+
+        // expand each beam node
+        for (BeamNode node : beam) {
+            for (string& mv : engine.getLegalMoves(node.fen)) {
+                BeamNode child = node;
                 child.moves.push_back(mv);
                 child.fen = engine.fenUpdater(child.fen, mv);
-                EvalResult r = engine.evaluatePosition(child.fen, depth);
 
-                int score = 0;
-                int distanceMate = abs(r.scoreMate);
+                EvalResult r = engine.evaluatePosition(child.fen, depth);
+                int score;
+                int dist = abs(r.scoreMate);
+
+                // assign large weights for mate lines
                 if (r.mate) {
                     if (isWhite) {
-                        if (r.scoreMate <= 0) {
-                            score = 1000000000 - distanceMate;
-                        } else {
-                            score = -1000000000;
-                        }
+                        score = (r.scoreMate <= 0)
+                            ? 1000000000 - dist
+                            : -1000000000;
                     } else {
-                        if (r.scoreMate <= 0) {
-                            score = -1000000000 + distanceMate;
-                        } else {
-                            score = 1000000000;
-                        }
+                        score = (r.scoreMate <= 0)
+                            ? -1000000000 + dist
+                            :  1000000000;
                     }
+                } else {
+                    score = r.scoreCp;  // centipawn score
                 }
-                else {
-                    score = r.scoreCp;
-                }
+
                 child.score = score;
-                childrenCandidates.push_back(child);
+                candidates.push_back(child);
             }
         }
 
-        // Sorts smallest to largest
-        sort(childrenCandidates.begin(),
-          childrenCandidates.end(),
-          [](auto const &a, auto const &b){
-            return a.score < b.score;
-          });
+        // keep top beamWidth nodes
+        sort(candidates.begin(), candidates.end(),
+             [](auto const &a, auto const &b){
+                 return a.score < b.score;
+             });
 
-        vector <BeamNode> newBeamNode;
+        vector<BeamNode> nextBeam;
         if (isWhite) {
-            int childrenCandidatesSize = childrenCandidates.size() - 1;
+            // pick highest scores
+            for (int i = 0, j = candidates.size() - 1; i < beamWidth; ++i, --j) {
+                nextBeam.push_back(candidates[j]);
+            }
+        } else {
+            // pick lowest scores
             for (int i = 0; i < beamWidth; ++i) {
-                newBeamNode.push_back(childrenCandidates[childrenCandidatesSize]);
-                childrenCandidatesSize--;
+                nextBeam.push_back(candidates[i]);
             }
         }
-        else {
-            for (int i = 0; i < beamWidth; ++i) {
-                newBeamNode.push_back(childrenCandidates[i]);
-            }
-        }
-        beam = newBeamNode;
+        beam = nextBeam;
 
-        for (BeamNode& node : beam) {
-            if (engine.isMate(node.fen)) {
-                return node.moves;
+        // check for mate in current beam
+        for (auto& n : beam) {
+            if (engine.isMate(n.fen)) {
+                return n.moves;  // solution found
             }
         }
 
-        for (BeamNode& node : beam) {
-            string reply = engine.bestMove(node.fen, depth);
-            node.moves.push_back(reply);
-            string fen = engine.fenUpdater(node.fen, reply);
-            node.fen = fen;
-
+        // play engine reply to advance positions
+        for (auto& n : beam) {
+            string reply = engine.bestMove(n.fen, depth);
+            n.moves.push_back(reply);
+            n.fen = engine.fenUpdater(n.fen, reply);
         }
     }
-    return {};
 
+    return {};  // no solution
 }

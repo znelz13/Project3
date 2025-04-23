@@ -7,8 +7,6 @@
 #include <iostream>
 #include <sstream>
 #include <thread>
-#include <memory>
-#include <chrono>
 
 
 namespace bp = boost::process;
@@ -37,7 +35,7 @@ ChessEngineInterface::ChessEngineInterface()
 ChessEngineInterface::~ChessEngineInterface()
 {
     engineInput << "quit\n" << std::flush;
-    engine.wait();          // safe: streams still alive
+    engine.wait();
 }
 
 
@@ -103,7 +101,7 @@ vector<string> ChessEngineInterface::getLegalMoves(const string& fen) {
  *  - Returns an EvalResult struct with the appropriate values.
  *
  * Note:
- *  - For forced mate puzzles, you need to use a depth that is twice the expected mate number.
+ *  - For forced mate puzzles, we need to use a depth that is twice the expected mate number.
  */
 EvalResult ChessEngineInterface::evaluatePosition(const string& fen, const int depth) {
 
@@ -153,7 +151,7 @@ EvalResult ChessEngineInterface::evaluatePosition(const string& fen, const int d
  * isMate
  *  - Checks if the given FEN position is an immediate checkmate.
  *  - Sends the FEN to Stockfish and uses a shallow search (depth 1) to determine if mate is present.
- *  - Returns true if Stockfish outputs "score mate 0"; otherwise, returns false.
+ *  - Returns true if Stockfish outputs "score mate 0" otherwise returns false.
  */
 bool ChessEngineInterface::isMate(const string& fen) {
 

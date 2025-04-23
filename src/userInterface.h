@@ -22,7 +22,6 @@ enum AlgorithmType {
 int launchSolverUI();
 
 
-
 #endif // CHESS_UI_H
 
 

@@ -22,7 +22,7 @@ vector<Puzzle> loadPuzzlesFromFile(int puzzleSize, int mateInN)
 {
     vector<Puzzle> allPuzzles;
 
-    // ── absolute path to the CSV ──────────────────────────────────────
+    // Absolute path to the CSV
     fs::path csvPath = fs::path(PROJECT_DIR) /
                        "data" /
                        "lichess_db_puzzle.csv";
@@ -37,12 +37,11 @@ vector<Puzzle> loadPuzzlesFromFile(int puzzleSize, int mateInN)
     string line;
     getline(file, line);
 
-    // Process each line of the CSV file
+
     while (getline(file, line)){
         istringstream lineStream(line);
         string puzzleId, ogFen, moves, rate, theme, garbage;
 
-        // Parse the expected columns (puzzleId, originalFen, moves, rating, 3 columns of garbage, then theme)
         getline(lineStream, puzzleId, ',' );
         getline(lineStream, ogFen, ',' );
         getline(lineStream, moves, ',' );
@@ -52,7 +51,7 @@ vector<Puzzle> loadPuzzlesFromFile(int puzzleSize, int mateInN)
         getline(lineStream, garbage, ',' );
         getline(lineStream, theme, ',' );
 
-        // Filter puzzles: Only use puzzles where the theme contains "mateInN"
+        // Filter puzzles and only use puzzles where the theme contains "mateInN"
         if (theme.find("mateIn" + to_string(mateInN)) != string::npos){
             int rating = stoi(rate);
 
@@ -62,7 +61,6 @@ vector<Puzzle> loadPuzzlesFromFile(int puzzleSize, int mateInN)
             iss >> firstMove;
 
             // Create a Puzzle object.
-            // Arguments: puzzleId, current FEN (empty here, will update later), original FEN, first move, rating, theme.
             allPuzzles.emplace_back(puzzleId, "", ogFen, firstMove, rating, theme); // Use emplace_back instead of push_back for performance
 
             // Stop if we've reached the desired number of puzzles.
